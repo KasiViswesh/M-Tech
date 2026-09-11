@@ -1,0 +1,195 @@
+import math
+def get_matrix():
+    n = int(input("Enter size of matrix (2 or 3 only): "))
+
+    A = []
+    for i in range(n):
+      l =[]
+      for j in range(n):
+        k = int(input(f"Enter row {i+1} element {j+1} "))
+        l.append(k)
+      A.append(l)
+    return A, n
+
+def eigenvalues_2x2(A):
+    a = A[0][0]
+    b = A[0][1]
+    c = A[1][0]
+    d = A[1][1]
+
+    trace = a + d
+    determinant = a * d - b * c
+
+    discriminant = trace * trace - 4 * determinant
+
+    if discriminant < 0:
+        print("Eigenvalues are complex. This program only handles real eigenvalues.")
+        return []
+
+    sqrt_value = math.sqrt(discriminant)
+
+    lambda1 = (trace + sqrt_value) / 2
+    lambda2 = (trace - sqrt_value) / 2
+
+    eigenvalues = [lambda1, lambda2]
+    return eigenvalues
+
+def eigenvector_2x2(A, eigenvalue):
+    a = A[0][0]
+    b = A[0][1]
+    c = A[1][0]
+    d = A[1][1]
+
+    if b != 0:
+        x = b
+        y = eigenvalue - a
+    elif c != 0:
+        x = eigenvalue - d
+        y = c
+    else:
+        x = 1
+        y = 0
+
+    length = math.sqrt(x * x + y * y)
+    x = x / length
+    y = y / length
+
+    vector = [x, y]
+    return vector
+
+def eigenvalues_3x3(A):
+    a11 = A[0][0]
+    a12 = A[0][1]
+    a13 = A[0][2]
+    a21 = A[1][0]
+    a22 = A[1][1]
+    a23 = A[1][2]
+    a31 = A[2][0]
+    a32 = A[2][1]
+    a33 = A[2][2]
+
+    trace = a11 + a22 + a33
+
+    determinant = (a11 * (a22 * a33 - a23 * a32) - a12 * (a21 * a33 - a23 * a31)+ a13 * (a21 * a32 - a22 * a31))
+
+    M = ((a11 * a22 - a12 * a21) + (a11 * a33 - a13 * a31) + (a22 * a33 - a23 * a32))
+    p = M - (trace * trace) / 3
+    q = -(2 * trace * trace * trace) / 27 + (trace * M) / 3 - determinant
+
+    eigenvalues = []
+
+    if abs(p) < 0.000001 and abs(q) < 0.000001:
+        # all three roots are equal
+        eigenvalues.append(trace / 3)
+        eigenvalues.append(trace / 3)
+        eigenvalues.append(trace / 3)
+    else:
+        inside = (3 * q) / (2 * p) * math.sqrt(-3 / p)
+
+        if inside > 1:
+            inside = 1
+        if inside < -1:
+            inside = -1
+
+        angle = math.acos(inside) / 3
+
+        k = 0
+        while k < 3:
+            t = 2 * math.sqrt(-p / 3) * math.cos(angle - (2 * math.pi * k) / 3)
+            lam = t + trace / 3
+            eigenvalues.append(lam)
+            k = k + 1
+
+    return eigenvalues
+
+def eigenvector_3x3(A, eigenvalue):
+    B = []
+    for i in range(3):
+        row = []
+        for j in range(3):
+            if i == j:
+                row.append(A[i][j] - eigenvalue)
+            else:
+                row.append(A[i][j])
+        B.append(row)
+      
+    row_pairs = [[0, 1], [0, 2], [1, 2]]
+
+    x = 0.0
+    y = 0.0
+    z = 0.0
+    length = 0.0
+
+    pair_index = 0
+    while pair_index < 3 and length < 0.000001:
+        i1 = row_pairs[pair_index][0]
+        i2 = row_pairs[pair_index][1]
+        row1 = B[i1]
+        row2 = B[i2]
+
+        x = row1[1] * row2[2] - row1[2] * row2[1]
+        y = row1[2] * row2[0] - row1[0] * row2[2]
+        z = row1[0] * row2[1] - row1[1] * row2[0]
+
+        length = math.sqrt(x * x + y * y + z * z)
+        pair_index = pair_index + 1
+
+    x = x / length
+    y = y / length
+    z = z / length
+
+    vector = [x, y, z]
+    return vector
+
+A, n = get_matrix()
+
+if n == 2:
+    eigenvalues = eigenvalues_2x2(A)
+
+    i = 0
+    while i < len(eigenvalues):
+        print("")
+        print("Eigenvalue", i + 1, "=", round(eigenvalues[i], 6))
+
+        vector = eigenvector_2x2(A, eigenvalues[i])
+        print("Eigenvector", i + 1, "= [", end=" ")
+        j = 0
+        while j < len(vector):
+            print(round(vector[j], 6), end=" ")
+            j = j + 1
+        print("]")
+
+        i = i + 1
+
+elif n == 3:
+    eigenvalues = eigenvalues_3x3(A)
+
+    i = 0
+    while i < len(eigenvalues):
+        print("")
+        print("Eigenvalue", i + 1, "=", round(eigenvalues[i], 6))
+
+        vector = eigenvector_3x3(A, eigenvalues[i])
+        print("Eigenvector", i + 1, "= [", end=" ")
+        j = 0
+        while j < len(vector):
+            print(round(vector[j], 6), end=" ")
+            j = j + 1
+        print("]")
+
+        i = i + 1
+
+else:
+    print("This program only supports 2x2 and 3x3 matrices.")
+
+************** OUTPUT ********************
+A = [[4, 6, 2], [6, 7, 2], [5, 3, 1]]
+
+Eigenvalue 1 = 12.96687
+Eigenvector 1 = [ 0.568043 0.710447 0.415443 ]
+
+Eigenvalue 2 = 0.351087
+Eigenvector 2 = [ -0.102096 0.369904 -0.923443 ]
+
+Eigenvalue 3 = -1.317957
+Eigenvector 3 = [ -0.485549 0.142869 0.862456 ]
