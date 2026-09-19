@@ -1,0 +1,86 @@
+# Logistic regression
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+
+url = 'https://raw.githubusercontent.com/mwaskom/seaborn-data/master/iris.csv'
+df = pd.read_csv(url)
+
+df = df[df['species'].isin(['setosa', 'versicolor'])]
+df['species'] = df['species'].replace({
+    'setosa': 0,
+    'versicolor': 1
+})
+
+y = df['species']
+x = df['petal_length']
+
+plt.scatter(x, y)
+plt.xlabel('Petal Length')
+plt.ylabel('Species')
+plt.title('Before Training')
+plt.yticks([0, 1], ['Setosa', 'Versicolor'])
+plt.grid(True)
+plt.show() 
+
+def sigmoid(z):
+    return 1 / (1 + np.exp(-z))
+
+
+w = 0
+b = 0
+
+# Training
+for i in range(1000):
+    for j in range(len(x)):
+        z = w * x[j] + b
+        pred = sigmoid(z)
+        error = pred - y[j]
+
+        w = w - 0.01 * error * x[j]
+        b = b - 0.01 * error
+
+predicted_classes = []
+
+for i in range(len(x)):
+    prob = sigmoid(w * x[i] + b)
+
+    if prob > 0.5:
+        predicted_classes.append(1)
+    else:
+        predicted_classes.append(0)
+
+plt.scatter(x, predicted_classes)
+plt.xlabel('Petal Length')
+plt.ylabel('Predicted Species')
+plt.title('After Training')
+plt.yticks([0, 1], ['Setosa', 'Versicolor'])
+plt.grid(True)
+plt.show()
+
+
+# Sigmoid curve
+x_curve = np.linspace(min(x), max(x), 200)
+y_curve = sigmoid(w * x_curve + b)
+
+plt.scatter(x, y, label='Actual Data')
+plt.plot(x_curve, y_curve, color='red', label='Sigmoid Curve')
+plt.axhline(y=0.5, color='gray', linestyle='--', label='Threshold = 0.5')
+
+plt.xlabel('Petal Length')
+plt.ylabel('Probability')
+plt.title('Sigmoid Curve After Training')
+plt.legend()
+plt.grid(True)
+plt.show()
+
+# Prediction 
+length = float(input("Enter the petal length: "))
+prob = sigmoid(w * length + b)
+
+print("Probability:", prob)
+
+if prob > 0.5:
+    print("versicolor")
+else:
+    print("setosa")
